@@ -32,15 +32,15 @@ print(f"Setting training device to: {device}.")
 
 # Path settings
 data_dir = "../data"
-output_dir = "../result"
+output_dir = "../results"
 
 # Dataset settings
 material = 'Trivial-Test'
-train_steps = ['1-1', '2-1', '3-1', '4-1', '5-1', '6-1', '7-1', '8-1', '9-1']
-noise_type = 'disp_relative'
-noise_level = 0.01
-test1_steps = ['1-1', '2-1', '3-1', '4-1', '5-1', '6-1']
-test2_steps = ['1-0', '1-1', '1-2', '1-3', '1-4', '1-5', '1-6', '1-7', '1-8', '1-9', '1-10']
+train_steps = ['1-1', '2-1']
+noise_type = 'none'
+noise_level = 0.0
+test1_steps = ['1-1', '2-1']
+test2_steps = ['1-0', '1-1']
 
 # Neural network training settings
 
@@ -61,8 +61,8 @@ eqb_loss_factor:                Factor to scale the force residuals at the free 
 bc_loss_factor:                 Factor to scale the force residuals at the fixed DoFs
 verbose_frequency:              Prints the training progress every nth epoch
 '''
-ensemble_size = 10
-epochs = 500
+ensemble_size = 2
+epochs = 5
 lr_schedule = 'plateau'
 optimization_method = 'adam'
 random_init_linear = True

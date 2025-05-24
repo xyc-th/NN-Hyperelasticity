@@ -45,9 +45,9 @@ for ensemble_iter in range(ensemble_size):
      loss_history, eq_loss_history, bc_loss_history, stress_loss_history,
      lr_history) = train_model(model, train_datasets)
     training_history = np.array([loss_history, eq_loss_history, bc_loss_history, stress_loss_history, lr_history])
-    os.makedirs(f"{output_dir}/{material}/model/{ensemble_iter}", exist_ok=True)
-    torch.save(model.state_dict(), f"{output_dir}/{material}/model/{ensemble_iter}/params.pth")
-    export_array(f"{output_dir}/{material}/model/{ensemble_iter}", f"training_history",
+    os.makedirs(f"{output_dir}/{material}/models/{ensemble_iter}", exist_ok=True)
+    torch.save(model.state_dict(), f"{output_dir}/{material}/models/{ensemble_iter}/params.pth")
+    export_array(f"{output_dir}/{material}/models/{ensemble_iter}", f"training_history",
                  training_history.T, header='loss,eq_loss,bc_loss,stress_loss,lr')
     ensemble_train_end_time = datetime.now()
     print(f"Time usage: {(ensemble_train_end_time - ensemble_train_start_time).total_seconds()} s.")

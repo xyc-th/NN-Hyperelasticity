@@ -1,3 +1,6 @@
+import numpy as np
+import torch
+
 from .config import *
 from .gen_util import *
 from .data_util import *
@@ -108,6 +111,25 @@ def nodal_force_3d_subplot(ax, coord, force, force_type=None):
     ax.set_zlabel(r'$Z\ (\mathrm{mm})$')
 
 
+def invariants_3d_plot(ax, I1, I2, I3):
+    scatter = ax.scatter(I1, I2, I3)
+    formatter = ScalarFormatter(useMathText=True)
+    formatter.set_scientific(True)
+    formatter.set_powerlimits((0, 0))
+    ax.xaxis.set_major_formatter(formatter)
+    formatter = ScalarFormatter(useMathText=True)
+    formatter.set_scientific(True)
+    formatter.set_powerlimits((0, 0))
+    ax.yaxis.set_major_formatter(formatter)
+    formatter = ScalarFormatter(useMathText=True)
+    formatter.set_scientific(True)
+    formatter.set_powerlimits((0, 0))
+    ax.zaxis.set_major_formatter(formatter)
+    ax.set_xlabel(r'$I_1$')
+    ax.set_ylabel(r'$I_2$')
+    ax.set_zlabel(r'$I_3$')
+
+
 def value_change_compare(ax, x_data, x_label, *y_info):
     color_list = ['blue', 'orange', 'green', 'red']
     linestyle_list = ['--', ':', '-.', '-']
@@ -127,6 +149,48 @@ def value_change_compare(ax, x_data, x_label, *y_info):
     ax.yaxis.set_major_formatter(formatter)
     ax.set_xlabel(x_label)
     ax.set_ylabel('value')
+
+
+def evaluate_uniformity(load_step):
+    output_path = f"{output_dir}/{material}/val/{load_step}"
+    os.makedirs(output_path, exist_ok=True)
+    evaluate_data_path = get_data_path(data_dir, material, type='train')
+    if load_step == 'all':
+        I1_list = []
+        I2_list = []
+        I3_list = []
+        for load_step in train_steps:
+            evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+            I1 = convert_tensor_to_numpy(evaluate_data.I1)
+            I2 = convert_tensor_to_numpy(evaluate_data.I2)
+            I3 = convert_tensor_to_numpy(evaluate_data.I3)
+            I1_list.append(I1)
+            I2_list.append(I2)
+            I3_list.append(I3)
+        I1 = np.concatenate(I1_list)
+        I2 = np.concatenate(I2_list)
+        I3 = np.concatenate(I3_list)
+    else:
+        evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+        I1 = convert_tensor_to_numpy(evaluate_data.I1)
+        I2 = convert_tensor_to_numpy(evaluate_data.I2)
+        I3 = convert_tensor_to_numpy(evaluate_data.I3)
+    fig = plt.figure(figsize=(10, 5))
+    ax = fig.add_subplot(111, projection='3d')
+    invariants_3d_plot(ax, I1, I2, I3)
+    plt.savefig(f"{output_path}/invariants.jpg")
+    plt.close()
+    var_I1 = np.var(I1)
+    var_I2 = np.var(I2)
+    var_I3 = np.var(I3)
+    print('-' * num_marker)
+    print("Variance for invariants:")
+    print(f"I1: {var_I1: .6f}, I2: {var_I2: .6f}, I3: {var_I3: .6f}")
+    print('-' * num_marker)
+    with open(f"{output_path}/variance.txt", 'w') as txt_file:
+        txt_file.write(f"I1: {var_I1: .6f}\n")
+        txt_file.write(f"I2: {var_I2: .6f}\n")
+        txt_file.write(f"I3: {var_I3: .6f}\n")
 
 
 def confidence_evaluation():
@@ -156,14 +220,34 @@ def confidence_evaluation():
 def evaluate_single_frame(ensemble_iter, model, data_type, load_step, mode=None):
     output_path = f"{output_dir}/{material}/{data_type}/{ensemble_iter}/{load_step}"
     os.makedirs(output_path, exist_ok=True)
-    evaluate_data_path = get_data_path(data_dir, material)
-    evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+    evaluate_data_path = get_data_path(data_dir, material, data_type)
+    if load_step == 'all':
+        sigma_model_list = []
+        sigma_real_list = []
+        if data_type == 'train':
+            steps = train_steps
+        elif data_type == 'test1' or data_type == 'test2':
+            raise ValueError("No implementation for all load steps in test model.")
+        for load_step in steps:
+            evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+            # Cauchy relative error
+            pk_stress = compute_value(evaluate_data, model, type_name='pk_stress')
+            sigma_model = pk_to_cauchy(evaluate_data.F, pk_stress)
+            sigma_real = pd.read_csv(f"{evaluate_data_path}/{load_step}/stress.csv")
+            sigma_real = torch.tensor(sigma_real[['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz']].values, dtype=torch.float)
+            sigma_model_list.append(sigma_model)
+            sigma_real_list.append(sigma_real)
+        sigma_model = torch.cat(sigma_model_list, dim=0)
+        sigma_real = torch.cat(sigma_real_list, dim=0)
 
-    # Cauchy relative error
-    pk_stress = compute_value(evaluate_data, model, type_name='pk_stress')
-    sigma_model = pk_to_cauchy(evaluate_data.F, pk_stress)
-    sigma_real = pd.read_csv(f"{evaluate_data_path}/{load_step}/stress.csv")
-    sigma_real = torch.tensor(sigma_real[['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz']].values, dtype=torch.float)
+    else:
+        evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+        # Cauchy relative error
+        pk_stress = compute_value(evaluate_data, model, type_name='pk_stress')
+        sigma_model = pk_to_cauchy(evaluate_data.F, pk_stress)
+        sigma_real = pd.read_csv(f"{evaluate_data_path}/{load_step}/stress.csv")
+        sigma_real = torch.tensor(sigma_real[['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz']].values, dtype=torch.float)
+
     sxx_error, syy_error, szz_error, sxy_error, sxz_error, syz_error, s_mises_error = cauchy_error(sigma_model,
                                                                                                    sigma_real)
     print("Relative error for Cauchy stress:")
@@ -217,6 +301,8 @@ def evaluate_single_frame(ensemble_iter, model, data_type, load_step, mode=None)
     plt.savefig(f"{output_path}/stress_comparison.jpg")
     plt.close()
     print("Done.")
+    if load_step == 'all':
+        return
 
     # Nodal force graph for surfaces
     print("Drawing nodal force figures for surfaces...", end='')
@@ -334,10 +420,10 @@ def evaluate_single_frame(ensemble_iter, model, data_type, load_step, mode=None)
     print('-' * num_marker)
 
 
-def evaluate_single_element(ensemble_iter, model, bypass_model, single_element_data):
+def evaluate_single_element(ensemble_iter, model, bypass_model, data_type):
     output_path = f"{output_dir}/{material}/single_element/{ensemble_iter}"
     os.makedirs(output_path, exist_ok=True)
-    evaluate_data_path = get_data_path(data_dir, material, single_element_data)
+    evaluate_data_path = get_data_path(data_dir, material, data_type)
     sigma_model_list = []
     sigma_real_list = []
     energy_model_list = []
@@ -347,7 +433,9 @@ def evaluate_single_element(ensemble_iter, model, bypass_model, single_element_d
     for load_step in os.listdir(evaluate_data_path):
         if not os.path.isdir(os.path.join(evaluate_data_path, load_step)):
             continue
-        evaluate_data = load_data(evaluate_data_path, load_step, noise_level=0.0, noise_type='displacement')
+        if load_step.split('-')[-1] == '10':
+            continue
+        evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
         num_load_step += 1
 
         pk_stress, strain_energy_model = compute_value(evaluate_data, model, type_name='pk_stress & energy')
@@ -375,5 +463,5 @@ def evaluate_single_element(ensemble_iter, model, bypass_model, single_element_d
     value_change_compare(axs[2], np.arange(num_load_step), x_label,
                          energy_model_list, energy_real_list, 'W')
     plt.tight_layout()
-    plt.savefig(f"{output_path}/{single_element_data}.jpg")
+    plt.savefig(f"{output_path}/{data_type}.jpg")
     plt.close()

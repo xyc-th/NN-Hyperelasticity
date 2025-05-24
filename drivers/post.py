@@ -3,6 +3,15 @@ from core import *
 
 def post_process():
     print('=' * num_marker)
+    print("Evaluating training data...")
+    os.makedirs(f"{output_dir}/{material}/train", exist_ok=True)
+    for load_step in train_steps:
+        evaluate_uniformity(load_step)
+    evaluate_uniformity('all')
+    print("Evaluation Completed.")
+    print('=' * num_marker)
+
+    print('=' * num_marker)
     print("Evaluating ICNN ensemble...")
     os.makedirs(f"{output_dir}/{material}/models", exist_ok=True)
     confidence_evaluation()
@@ -33,6 +42,7 @@ def post_process():
         # Validate in training set
         for load_step in train_steps:
             evaluate_single_frame(ensemble_iter, model, 'train', load_step, mode='val')
+        evaluate_single_frame(ensemble_iter, model, 'train', load_step='all', mode='val')
 
         # Test in testing set, change geometry
         for load_step in test1_steps:
@@ -43,13 +53,12 @@ def post_process():
             evaluate_single_frame(ensemble_iter, model, 'test2', load_step, mode='test')
 
         # Single element test
-        print("Drawing single element test figure for tensile load...")
-        evaluate_single_element(ensemble_iter, model, model_ideal, 'single_shear')
-        print("Done.")
         print("Drawing single element test figure for shear load...")
-        evaluate_single_element(ensemble_iter, model, model_ideal, 'single_tensile')
+        evaluate_single_element(ensemble_iter, model, model_ideal, 'test_single_shear')
         print("Done.")
-
+        print("Drawing single element test figure for tensile load...")
+        evaluate_single_element(ensemble_iter, model, model_ideal, 'test_single_tensile')
+        print("Done.")
     print("Evaluation Completed.")
     print('=' * num_marker)
 
