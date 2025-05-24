@@ -3,8 +3,8 @@ from .gen_util import *
 
 class Dataset:
     def __init__(self, path,
-                 x_node, u_node, bc_node, test_bc_node, dirichlet_node, rf_global,
-                 connectivity, grad_shape_func, volume_element,
+                 x_node, u_node, bc_node, test_bc_node, dirichlet_node, test_bc_all_node,
+                 rf_global, connectivity, grad_shape_func, volume_element,
                  F, J, C, I1, I2, I3, S, P):
         """
         Generate 'Dataset' object.
@@ -37,6 +37,7 @@ class Dataset:
         self.bc_node = bc_node
         self.test_bc_node = test_bc_node
         self.dirichlet_node = dirichlet_node  # boolean: num_node * 2
+        self.test_bc_all_node = test_bc_all_node  # boolean: num_node * 2
 
         # Global reaction force
         self.rf_global = rf_global
@@ -244,8 +245,9 @@ def load_data(path, load_step, noise_type='none', noise_level=0.0):
     S = torch.tensor(data_cauchy[['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz']].values, dtype=torch.float).to(device)
     P = cauchy_to_pk(F, S).to(device)
 
-    dataset = Dataset(path, x_node, u_node, bc_node, test_bc_node, dirichlet_node, rf_global, connectivity,
-                      grad_shape_func, volume_element, F, J, C, I1, I2, I3, S, P)
+    dataset = Dataset(path, x_node, u_node, bc_node, test_bc_node, dirichlet_node, test_bc_all_node,
+                      rf_global, connectivity, grad_shape_func, volume_element,
+                      F, J, C, I1, I2, I3, S, P)
 
     print('-' * num_marker)
     return dataset

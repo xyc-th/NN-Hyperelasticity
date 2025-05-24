@@ -7,13 +7,15 @@ from abaqusConstants import *
 from odbAccess import openOdb
 
 # Configs
-odb_path = r"C:\temp\Job-6.odb"
-export_path = r"C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity-3D\data\simu\neo_hookean_cube_full"
+material = "Trivial-Test"
+data_type_set = ["train", "test1", "test2", "test_single_shear", "test_single_tensile"]
+odb_path_prefix = r"D:\Courses\Dissertation\ABAQUS models\Materials"
+export_path_prefix = r"C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data"
 dim = 3
 node_per_element = 4
 
 
-def data_generate():
+def data_generate(odb_path, export_path):
     # Message to the terminal
     time = datetime.now()
     print("=" * 100)
@@ -161,7 +163,11 @@ def data_generate():
     summary_file.write("=" * 100 + '\n')
 
 
-if not os.path.exists(export_path):
-    os.makedirs(export_path)
-with open(export_path + r"\log.txt", 'w') as summary_file:
-    data_generate()
+if __name__ == '__main__':
+    for data_type in data_type_set:
+        odb_path = odb_path_prefix + "\\" + material + "\\" + data_type + "\\" + "Job-1.odb"
+        export_path = export_path_prefix + "\\" + material + "\\" + data_type
+        if not os.path.exists(export_path):
+            os.makedirs(export_path)
+        with open(export_path + r"\log.txt", 'w') as summary_file:
+            data_generate(odb_path, export_path)

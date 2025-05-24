@@ -1,0 +1,25 @@
+====================================================================================================
+2025-05-24 20:47:07.765000
+Start generating data...
+Data source path:            D:\Courses\Dissertation\ABAQUS models\Materials\Trivial-Test\train\Job-1.odb
+Export path:                 C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data\Trivial-Test\train
+Dimension:                   3
+Node per element:            4
+----------------------------------------------------------------------------------------------------
+Number of elements:          1
+----------------------------------------------------------------------------------------------------
+Number of nodes:             4
+----------------------------------------------------------------------------------------------------
+Number of boundaries:        3
+Names of boundaries: 
+['SURF-1', 'SURF-2', 'SURF-3']
+----------------------------------------------------------------------------------------------------
+Number of test boundaries:   1
+Names of test boundaries: 
+['SET-1']
+----------------------------------------------------------------------------------------------------
+Number of steps:             2
+[Step-1] Number of frames:   2
+[Step-2] Number of frames:   2
+All done!
+====================================================================================================
