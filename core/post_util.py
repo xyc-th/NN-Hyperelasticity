@@ -159,8 +159,8 @@ def evaluate_uniformity(load_step):
         I1_list = []
         I2_list = []
         I3_list = []
-        for load_step in train_steps:
-            evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+        for step in train_steps:
+            evaluate_data = load_data(evaluate_data_path, step, noise_type='none', noise_level=0.0)
             I1 = convert_tensor_to_numpy(evaluate_data.I1)
             I2 = convert_tensor_to_numpy(evaluate_data.I2)
             I3 = convert_tensor_to_numpy(evaluate_data.I3)
@@ -228,12 +228,12 @@ def evaluate_single_frame(ensemble_iter, model, data_type, load_step, mode=None)
             steps = train_steps
         elif data_type == 'test1' or data_type == 'test2':
             raise ValueError("No implementation for all load steps in test model.")
-        for load_step in steps:
-            evaluate_data = load_data(evaluate_data_path, load_step, noise_type='none', noise_level=0.0)
+        for step in steps:
+            evaluate_data = load_data(evaluate_data_path, step, noise_type='none', noise_level=0.0)
             # Cauchy relative error
             pk_stress = compute_value(evaluate_data, model, type_name='pk_stress')
             sigma_model = pk_to_cauchy(evaluate_data.F, pk_stress)
-            sigma_real = pd.read_csv(f"{evaluate_data_path}/{load_step}/stress.csv")
+            sigma_real = pd.read_csv(f"{evaluate_data_path}/{step}/stress.csv")
             sigma_real = torch.tensor(sigma_real[['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz']].values, dtype=torch.float)
             sigma_model_list.append(sigma_model)
             sigma_real_list.append(sigma_real)
@@ -416,6 +416,49 @@ def evaluate_single_frame(ensemble_iter, model, data_type, load_step, mode=None)
         plt.tight_layout()
         plt.savefig(f"{output_path}/test_boundary_{bc_rank}_force.jpg")
         plt.close()
+    fig = plt.figure(figsize=(12, 16))
+    node_rank = evaluate_data.test_bc_all_node.cpu()
+    x_node = evaluate_data.x_node[node_rank].cpu()
+    ax = fig.add_subplot(4, 3, 1, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 0],
+                           force_type=r'f_x^\mathrm{ICNN}')
+    ax = fig.add_subplot(4, 3, 2, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_real[node_rank, 0],
+                           force_type=r'f_x^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 3, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 0] - rf_real[node_rank, 0],
+                           force_type=r'f_x^\mathrm{ICNN}-f_x^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 4, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 1],
+                           force_type=r'f_y^\mathrm{ICNN}')
+    ax = fig.add_subplot(4, 3, 5, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_real[node_rank, 1],
+                           force_type=r'f_y^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 6, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 1] - rf_real[node_rank, 1],
+                           force_type=r'f_y^\mathrm{ICNN}-f_y^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 7, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 2],
+                           force_type=r'f_z^\mathrm{ICNN}')
+    ax = fig.add_subplot(4, 3, 8, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_real[node_rank, 2],
+                           force_type=r'f_z^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 9, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, rf_node[node_rank, 2] - rf_real[node_rank, 2],
+                           force_type=r'f_z^\mathrm{ICNN}-f_z^\mathrm{FEM}')
+    ax = fig.add_subplot(4, 3, 10, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, torch.norm(rf_node[node_rank], dim=1),
+                           force_type=r'\left\Vert\boldsymbol{f}^\mathrm{ICNN}\right\Vert')
+    ax = fig.add_subplot(4, 3, 11, projection='3d')
+    nodal_force_3d_subplot(ax, x_node, torch.norm(rf_real[node_rank], dim=1),
+                           force_type=r'\left\Vert\boldsymbol{f}^\mathrm{FEM}\right\Vert')
+    ax = fig.add_subplot(4, 3, 12, projection='3d')
+    nodal_force_3d_subplot(ax, x_node,
+                           torch.norm(rf_node[node_rank] - rf_real[node_rank], dim=1),
+                           force_type=r'\left\Vert\boldsymbol{f}^\mathrm{ICNN}-\boldsymbol{f}^\mathrm{FEM}\right\Vert')
+    plt.tight_layout()
+    plt.savefig(f"{output_path}/test_boundary_all_force.jpg")
+    plt.close()
     print("Done.")
     print('-' * num_marker)
 
