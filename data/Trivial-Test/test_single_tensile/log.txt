@@ -1,5 +1,5 @@
 ====================================================================================================
-2025-05-24 20:47:24.472000
+2025-05-24 23:31:02.954000
 Start generating data...
 Data source path:            D:\Courses\Dissertation\ABAQUS models\Materials\Trivial-Test\test_single_tensile\Job-1.odb
 Export path:                 C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data\Trivial-Test\test_single_tensile
