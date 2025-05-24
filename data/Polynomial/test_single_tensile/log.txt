@@ -1,0 +1,27 @@
+====================================================================================================
+2025-05-25 00:43:01.914000
+Start generating data...
+Data source path:            D:\Courses\Dissertation\ABAQUS models\Materials\Polynomial\test_single_tensile\Job-1.odb
+Export path:                 C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data\Polynomial\test_single_tensile
+Dimension:                   3
+Node per element:            4
+----------------------------------------------------------------------------------------------------
+Number of elements:          1
+----------------------------------------------------------------------------------------------------
+Number of nodes:             4
+----------------------------------------------------------------------------------------------------
+Number of boundaries:        1
+Names of boundaries: 
+['SURF-1']
+----------------------------------------------------------------------------------------------------
+Number of test boundaries:   1
+Names of test boundaries: 
+['SET-1']
+----------------------------------------------------------------------------------------------------
+Number of steps:             4
+[Step-1] Number of frames:   11
+[Step-2] Number of frames:   11
+[Step-3] Number of frames:   11
+[Step-4] Number of frames:   11
+All done!
+====================================================================================================

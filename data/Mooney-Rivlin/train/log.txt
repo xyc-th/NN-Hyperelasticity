@@ -1,0 +1,32 @@
+====================================================================================================
+2025-05-25 00:40:32.124000
+Start generating data...
+Data source path:            D:\Courses\Dissertation\ABAQUS models\Materials\Mooney-Rivlin\train\Job-1.odb
+Export path:                 C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data\Mooney-Rivlin\train
+Dimension:                   3
+Node per element:            4
+----------------------------------------------------------------------------------------------------
+Number of elements:          8110
+----------------------------------------------------------------------------------------------------
+Number of nodes:             1722
+----------------------------------------------------------------------------------------------------
+Number of boundaries:        6
+Names of boundaries: 
+['SURF-1', 'SURF-2', 'SURF-3', 'SURF-4', 'SURF-5', 'SURF-6']
+----------------------------------------------------------------------------------------------------
+Number of test boundaries:   1
+Names of test boundaries: 
+['SET-1']
+----------------------------------------------------------------------------------------------------
+Number of steps:             9
+[Step-1] Number of frames:   2
+[Step-2] Number of frames:   2
+[Step-3] Number of frames:   2
+[Step-4] Number of frames:   2
+[Step-5] Number of frames:   2
+[Step-6] Number of frames:   2
+[Step-7] Number of frames:   2
+[Step-8] Number of frames:   2
+[Step-9] Number of frames:   2
+All done!
+====================================================================================================

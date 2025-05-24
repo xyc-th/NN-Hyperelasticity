@@ -7,7 +7,7 @@ from abaqusConstants import *
 from odbAccess import openOdb
 
 # Configs
-material = "Trivial-Test"
+material = "Polynomial"
 data_type_set = ["train", "test1", "test2", "test_single_shear", "test_single_tensile"]
 odb_path_prefix = r"D:\Courses\Dissertation\ABAQUS models\Materials"
 export_path_prefix = r"C:\Users\Xinyi\PycharmProjects\NN-Hyperelasticity\data"
